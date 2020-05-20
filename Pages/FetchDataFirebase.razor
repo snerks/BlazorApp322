@@ -22,7 +22,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var show in showsInfo.shows.Where(show => show.date >= DateTime.Now))
+            @foreach (var show in showsInfo.shows.Where(show => true /* show.date >= DateTime.Now */))
             {
             <tr>
                 <td>@show.date.ToString("dddd")</td>
@@ -37,17 +37,22 @@ else
                 <td>
                     @if (!string.IsNullOrWhiteSpace(show.notes))
                     {
-                        <p>@show.notes</p>
+                    <p>@show.notes</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(show.priceText) && !show.priceText.Contains("SOLD OUT"))
+                    {
+                    <p><span class="badge badge-pill badge-info">@show.priceText</span></p>
                     }
 
                     @if (show.isSoldOut)
                     {
-                        <p>SOLD OUT!</p>
+                    <p><span class="badge badge-pill badge-warning">Sold Out</span></p>
                     }
 
                     @if (show.isCancelled)
                     {
-                        <p>Cancelled</p>
+                    <p><span class="badge badge-pill badge-danger">Cancelled</span></p>
                     }
 
                 </td>
