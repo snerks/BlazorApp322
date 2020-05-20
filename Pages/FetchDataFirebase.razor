@@ -1,0 +1,130 @@
+@page "/fetchdatafirebase"
+@inject HttpClient Http
+
+<h1>Gigs Of Note</h1>
+
+<p>This component demonstrates fetching data from the server.</p>
+
+@if (showsInfo == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Day</th>
+                <th>Date</th>
+                <th>Artists</th>
+                <th>Venue</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var show in showsInfo.shows.Where(show => show.date >= DateTime.Now))
+            {
+            <tr>
+                <td>@show.date.ToString("dddd")</td>
+                <td>@show.date.ToString("dd MMMM yyyy")</td>
+                <td>
+                    @foreach (var artistName in show.artists.Select(a => a.name).ToList())
+                    {   
+                        <p>@artistName</p>
+                    }
+                </td>
+                <td>@show.venue</td>
+                <td>
+                    @if (!string.IsNullOrWhiteSpace(show.notes))
+                    {
+                        <p>@show.notes</p>
+                    }
+
+                    @if (show.isSoldOut)
+                    {
+                        <p>SOLD OUT!</p>
+                    }
+
+                    @if (show.isCancelled)
+                    {
+                        <p>Cancelled</p>
+                    }
+
+                </td>
+            </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private ShowsInfo showsInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "https://show01-cd72d.firebaseio.com/.json?print=pretty";
+
+        try
+        {
+            // var json = await Http.GetStringAsync(url);
+            // eventIdBts issue - sometimes empty string ""
+            showsInfo = await Http.GetFromJsonAsync<ShowsInfo>(url);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            throw;
+        }
+    }
+
+    //public class WeatherForecast
+    //{
+    //    public DateTime Date { get; set; }
+
+    //    public int TemperatureC { get; set; }
+
+    //    public string Summary { get; set; }
+
+    //    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    //}
+
+    public class ShowsInfo
+    {
+        public DateTime lastUpdated { get; set; }
+        public List<Show> shows { get; set; }
+    }
+
+    public class Show
+    {
+        public string id { get; set; }
+        //public int eventIdBts { get; set; }
+        public DateTime addedDate { get; set; }
+        public Boolean  isSoldOut { get; set; }
+        public Boolean isCancelled { get; set; }
+
+        public DateTime onSaleDate { get; set; }
+        public string priceText { get; set; }
+        public DateTime date { get; set; }
+        public string venue { get; set; }
+
+        public List<Artist> artists { get; set; }
+        public string notes { get; set; }
+        public string detailsUri { get; set; }
+        public string artistsText { get; set; }
+    }
+
+    public class Artist
+    {
+        public string name { get; set; }
+        public string stageTime { get; set; }
+        public string videoUrl { get; set; }
+        public string id { get; set; }
+    }
+
+    public class VenueBts
+    {
+        public string name { get; set; }
+        public string nameRaw { get; set; }
+        public string id { get; set; }
+    }
+}
