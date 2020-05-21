@@ -11,6 +11,10 @@
 }
 else
 {
+    <div style="margin-bottom: 15px;">
+        <input type="checkbox" @bind="includePastShows" /> Include Past Shows
+    </div>
+
     <table class="table">
         <thead>
             <tr>
@@ -22,7 +26,7 @@ else
             </tr>
         </thead>
         <tbody>
-            @foreach (var show in showsInfo.shows.Where(show => true /* show.date >= DateTime.Now */))
+            @foreach (var show in showsInfo.shows.Where(show => includePastShows || show.date >= DateTime.Now ))
             {
             <tr>
                 <td>@show.date.ToString("dddd")</td>
@@ -64,6 +68,7 @@ else
 
 @code {
     private ShowsInfo showsInfo;
+    private bool includePastShows = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -81,17 +86,6 @@ else
             throw;
         }
     }
-
-    //public class WeatherForecast
-    //{
-    //    public DateTime Date { get; set; }
-
-    //    public int TemperatureC { get; set; }
-
-    //    public string Summary { get; set; }
-
-    //    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    //}
 
     public class ShowsInfo
     {
