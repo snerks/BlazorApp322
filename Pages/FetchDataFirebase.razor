@@ -11,8 +11,14 @@
 }
 else
 {
-    <div style="margin-bottom: 15px;">
+    @* <div style="margin-bottom: 15px;">
         <input type="checkbox" @bind="includePastShows" /> Include Past Shows
+    </div> *@
+
+
+    <div class="form-check" style="margin-bottom: 15px;">
+        <input type="checkbox" class="form-check-input" id="includePastShowsCheckBox" @bind="includePastShows" />
+        <label class="form-check-label" for="includePastShowsCheckBox">Include Past Shows</label>
     </div>
 
     <table class="table">
@@ -33,7 +39,7 @@ else
                 <td>@show.date.ToString("dd MMMM yyyy")</td>
                 <td>
                     @foreach (var artistName in show.artists.Select(a => a.name).ToList())
-                    {   
+                    {
                         <p>@artistName</p>
                     }
                 </td>
@@ -98,7 +104,7 @@ else
         public string id { get; set; }
         //public int eventIdBts { get; set; }
         public DateTime addedDate { get; set; }
-        public Boolean  isSoldOut { get; set; }
+        public Boolean isSoldOut { get; set; }
         public Boolean isCancelled { get; set; }
 
         public DateTime onSaleDate { get; set; }
