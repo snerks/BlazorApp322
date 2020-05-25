@@ -135,6 +135,7 @@ else
 
     private string GetItemUrl(string showId)
     {
-        return $"/fetchdatafirebasedetails/{showId}";
+        var result = $"{Http.BaseAddress}fetchdatafirebasedetails/{showId}";
+        return result;
     }
 }
