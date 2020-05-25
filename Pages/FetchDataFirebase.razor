@@ -6,18 +6,12 @@
 
 <h1>Gigs Of Note</h1>
 
-<p>This component demonstrates fetching data from the server.</p>
-
 @if (showsInfo == null)
 {
 <p><em>Loading...</em></p>
 }
 else
 {
-@* <div style="margin-bottom: 15px;">
-        <input type="checkbox" @bind="includePastShows" /> Include Past Shows
-    </div> *@
-
 
 <div class="form-check" style="margin-bottom: 15px;">
     <input type="checkbox" class="form-check-input" id="includePastShowsCheckBox" @bind="includePastShows" />
