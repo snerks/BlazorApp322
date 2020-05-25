@@ -1,6 +1,8 @@
 @page "/fetchdatafirebase"
 @inject HttpClient Http
 
+@using Humanizer
+
 <h1>Gigs Of Note</h1>
 
 <p>This component demonstrates fetching data from the server.</p>
@@ -23,7 +25,9 @@ else
 
 <div class="form-group">
     <label for="artistFilter">Artist Filter</label>
-    <input type="text" @bind="artistFilterText" @bind:event="oninput" class="form-control" id="artistFilter" aria-describedby="artistFilterHelp">
+    <span class="badge badge-pill badge-info">@RelevantShowsCountMessage</span>
+    <input type="text" @bind="artistFilterText" @bind:event="oninput"
+           class="form-control" id="artistFilter" aria-describedby="artistFilterHelp">
 </div>
 
 <table class="table">
@@ -37,7 +41,7 @@ else
         </tr>
     </thead>
     <tbody>
-        @foreach (var show in GetRelevantShows())
+        @foreach (var show in RelevantShows)
             {
         <tr>
             <td>@show.date.ToString("dddd")</td>
@@ -99,20 +103,27 @@ else
         }
     }
 
-    private IEnumerable<Show> GetRelevantShows() {
+    private int RelevantShowsCount => RelevantShows.Count();
+    private string RelevantShowsCountMessage => "show".ToQuantity(RelevantShowsCount);
 
-        var results = 
-            showsInfo
-                .shows
-                .Where(show => includePastShows || show.date >= DateTime.Now )
-                .Where(show => 
-                    string.IsNullOrWhiteSpace(artistFilterText) || 
-                    show
-                        .artists
-                        .Select(artist => artist.name)
-                        .Any(name => name.Contains(artistFilterText, System.StringComparison.CurrentCultureIgnoreCase)));
+    private IEnumerable<Show> RelevantShows
+    {
+        get
+        {
 
-        return results;
+            var results =
+                showsInfo
+                    .shows
+                    .Where(show => includePastShows || show.date >= DateTime.Now)
+                    .Where(show =>
+                        string.IsNullOrWhiteSpace(artistFilterText) ||
+                        show
+                            .artists
+                            .Select(artist => artist.name)
+                            .Any(name => name.Contains(artistFilterText, System.StringComparison.CurrentCultureIgnoreCase)));
+
+            return results;
+        }
     }
 
     public class ShowsInfo
