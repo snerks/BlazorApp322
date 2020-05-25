@@ -1,0 +1,102 @@
+@page "/fetchdatafirebasedetails/{id}"
+
+@inject HttpClient Http
+
+@using Humanizer
+@using BlazorApp322.Shared.Models
+
+<h1>Gig Details</h1>
+
+@if (showsInfo == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    if (Show is null)
+    {
+        <p><em>Show details not found</em></p>
+    }
+    else
+    {
+        <div class="card" style="width: auto;">
+            <div class="card-body">
+                <p class="card-text">@Show.date.ToString("ddd dd MMM yyyy")</p>
+
+                <h5 class="card-title">@Show.artists.First().name</h5>
+                <h6 class="card-title">@Show.venue</h6>
+
+                <h5 class="card-title">Artists</h5>
+
+                @foreach (var artist in Show.artists)
+                {
+                    <p class="card-text">@artist.name</p>
+                }
+
+                <div>
+                    @if (!string.IsNullOrWhiteSpace(Show.notes))
+                    {
+                        <p>@Show.notes</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Show.priceText) && !Show.priceText.Contains("SOLD OUT"))
+                    {
+                        <p><span class="badge badge-pill badge-info">@Show.priceText</span></p>
+                    }
+
+                    @if (Show.isSoldOut)
+                    {
+                        <p><span class="badge badge-pill badge-warning">Sold Out</span></p>
+                    }
+
+                    @if (Show.isCancelled)
+                    {
+                        <p><span class="badge badge-pill badge-danger">Cancelled</span></p>
+                    }
+
+                </div>
+                @*<a href="#" class="btn btn-primary">Go somewhere</a>*@
+                <p><i>Id: @Show.id</i></p>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private ShowsInfo showsInfo;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var url = "https://show01-cd72d.firebaseio.com/.json?print=pretty";
+
+        try
+        {
+            // var json = await Http.GetStringAsync(url);
+            // eventIdBts issue - sometimes empty string ""
+            showsInfo = await Http.GetFromJsonAsync<ShowsInfo>(url);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+            throw;
+        }
+    }
+
+    private Show Show
+    {
+        get
+        {
+
+            var result =
+                showsInfo
+                    .shows
+                    .Where(show => show.id == Id)
+                    .SingleOrDefault();
+
+            return result;
+        }
+    }
+}
