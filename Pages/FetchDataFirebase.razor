@@ -7,74 +7,80 @@
 
 @if (showsInfo == null)
 {
-    <p><em>Loading...</em></p>
+<p><em>Loading...</em></p>
 }
 else
 {
-    @* <div style="margin-bottom: 15px;">
+@* <div style="margin-bottom: 15px;">
         <input type="checkbox" @bind="includePastShows" /> Include Past Shows
     </div> *@
 
 
-    <div class="form-check" style="margin-bottom: 15px;">
-        <input type="checkbox" class="form-check-input" id="includePastShowsCheckBox" @bind="includePastShows" />
-        <label class="form-check-label" for="includePastShowsCheckBox">Include Past Shows</label>
-    </div>
+<div class="form-check" style="margin-bottom: 15px;">
+    <input type="checkbox" class="form-check-input" id="includePastShowsCheckBox" @bind="includePastShows" />
+    <label class="form-check-label" for="includePastShowsCheckBox">Include Past Shows</label>
+</div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Day</th>
-                <th>Date</th>
-                <th>Artists</th>
-                <th>Venue</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var show in showsInfo.shows.Where(show => includePastShows || show.date >= DateTime.Now ))
+<div class="form-group">
+    <label for="artistFilter">Artist Filter</label>
+    <input type="text" @bind="artistFilterText" @bind:event="oninput" class="form-control" id="artistFilter" aria-describedby="artistFilterHelp">
+</div>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Day</th>
+            <th>Date</th>
+            <th>Artists</th>
+            <th>Venue</th>
+            <th>Notes</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var show in GetRelevantShows())
             {
-            <tr>
-                <td>@show.date.ToString("dddd")</td>
-                <td>@show.date.ToString("dd MMMM yyyy")</td>
-                <td>
-                    @foreach (var artistName in show.artists.Select(a => a.name).ToList())
+        <tr>
+            <td>@show.date.ToString("dddd")</td>
+            <td>@show.date.ToString("dd MMMM yyyy")</td>
+            <td>
+                @foreach (var artistName in show.artists.Select(a => a.name).ToList())
                     {
-                        <p>@artistName</p>
+                <p>@artistName</p>
                     }
-                </td>
-                <td>@show.venue</td>
-                <td>
-                    @if (!string.IsNullOrWhiteSpace(show.notes))
+            </td>
+            <td>@show.venue</td>
+            <td>
+                @if (!string.IsNullOrWhiteSpace(show.notes))
                     {
-                    <p>@show.notes</p>
-                    }
-
-                    @if (!string.IsNullOrWhiteSpace(show.priceText) && !show.priceText.Contains("SOLD OUT"))
-                    {
-                    <p><span class="badge badge-pill badge-info">@show.priceText</span></p>
+                <p>@show.notes</p>
                     }
 
-                    @if (show.isSoldOut)
+                @if (!string.IsNullOrWhiteSpace(show.priceText) && !show.priceText.Contains("SOLD OUT"))
                     {
-                    <p><span class="badge badge-pill badge-warning">Sold Out</span></p>
+                <p><span class="badge badge-pill badge-info">@show.priceText</span></p>
                     }
 
-                    @if (show.isCancelled)
+                @if (show.isSoldOut)
                     {
-                    <p><span class="badge badge-pill badge-danger">Cancelled</span></p>
+                <p><span class="badge badge-pill badge-warning">Sold Out</span></p>
                     }
 
-                </td>
-            </tr>
+                @if (show.isCancelled)
+                    {
+                <p><span class="badge badge-pill badge-danger">Cancelled</span></p>
+                    }
+
+            </td>
+        </tr>
             }
-        </tbody>
-    </table>
+    </tbody>
+</table>
 }
 
 @code {
     private ShowsInfo showsInfo;
     private bool includePastShows = false;
+    private string artistFilterText = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,6 +97,22 @@ else
             Console.WriteLine(ex.ToString());
             throw;
         }
+    }
+
+    private IEnumerable<Show> GetRelevantShows() {
+
+        var results = 
+            showsInfo
+                .shows
+                .Where(show => includePastShows || show.date >= DateTime.Now )
+                .Where(show => 
+                    string.IsNullOrWhiteSpace(artistFilterText) || 
+                    show
+                        .artists
+                        .Select(artist => artist.name)
+                        .Any(name => name.Contains(artistFilterText, System.StringComparison.CurrentCultureIgnoreCase)));
+
+        return results;
     }
 
     public class ShowsInfo
